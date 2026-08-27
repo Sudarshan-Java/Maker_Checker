@@ -45,13 +45,11 @@ pipeline {
         // on the local Windows machine.
         // ============================================================
 
-        APPZILLON_SERVER_WAR =
-        "C:\\deploy\\maker-checker-frontend\\AppzillonServer.war"
+        APPZILLON_SERVER_WAR = 'C:\\deploy\\maker-checker-frontend\\AppzillonServer.war'
 
-    CHECKER_MAKER_WAR =
-        "C:\\deploy\\maker-checker-frontend\\Checker_Maker.war"
+        CHECKER_MAKER_WAR = 'C:\\deploy\\maker-checker-frontend\\Checker_Maker.war'
         // Name used when copying WAR into Tomcat webapps
-        FRONTEND_CONTEXT = 'Checker_Maker'
+        FRONTEND_CONTEXT = '.'
 
         // ============================================================
         // TOMCAT
