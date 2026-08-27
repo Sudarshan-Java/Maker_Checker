@@ -15,8 +15,8 @@ pipeline {
         // JAVA / MAVEN
         // ============================================================
 
-        JAVA_HOME = 'C:\Program Files\Java\jdk-17.0.2'
-        MAVEN_HOME = 'D:\Softwarepath\apache-maven-3.8.5'
+        JAVA_HOME = 'C:\\Program Files\\Java\\jdk-17.0.2'
+        MAVEN_HOME = 'D:\\Softwarepath\\apache-maven-3.8.5'
 
         // ============================================================
         // PROJECT
@@ -46,10 +46,10 @@ pipeline {
         // ============================================================
 
         APPZILLON_SERVER_WAR =
-        "C:\deploy\maker-checker-frontend\AppzillonServer.war"
+        "C:\\deploy\\maker-checker-frontend\\AppzillonServer.war"
 
     CHECKER_MAKER_WAR =
-        "C:\deploy\maker-checker-frontend\Checker_Maker.war"
+        "C:\\deploy\\maker-checker-frontend\\Checker_Maker.war"
         // Name used when copying WAR into Tomcat webapps
         FRONTEND_CONTEXT = 'Checker_Maker'
 
@@ -57,7 +57,7 @@ pipeline {
         // TOMCAT
         // ============================================================
 
-        TOMCAT_HOME = 'D:\Softwarepath\apache-tomcat-9.0.53'
+        TOMCAT_HOME = 'D:\\Softwarepath\\apache-tomcat-9.0.53'
         TOMCAT_PORT = '8080'
 
         // ============================================================
