@@ -379,40 +379,28 @@ stage('Start Backend') {
         bat '''
             @echo off
 
-            cd /d "%WORKSPACE%"
-
-            set "JAVA_HOME=C:\\Program Files\\Java\\jdk-17.0.2"
-            set "MAVEN_HOME=D:\\Softwarepath\\apache-maven-3.8.5"
-            set "PATH=%JAVA_HOME%\\bin;%MAVEN_HOME%\\bin;%PATH%"
-
-            echo.
-            echo Starting Maven Spring Boot application...
+            echo Starting backend using deploy.bat...
             echo.
 
-            powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$p = New-Object System.Diagnostics.Process; $p.StartInfo.FileName = 'cmd.exe'; $p.StartInfo.Arguments = '/k cd /d ""%WORKSPACE%"" && mvn spring-boot:run'; $p.StartInfo.WorkingDirectory = '%WORKSPACE%'; $p.StartInfo.UseShellExecute = $true; $p.Start(); Write-Host ('Backend PID: ' + $p.Id)"
-
-            if errorlevel 1 (
-                echo.
-                echo ERROR: Failed to start backend
+            if not exist "C:\\deploy\\maker-checker\\deploy.bat" (
+                echo ERROR: deploy.bat not found
                 exit /b 1
             )
 
-            echo.
-            echo Backend startup command sent successfully.
-            echo.
-
-            timeout /t 20 /nobreak >nul
+            call "C:\\deploy\\maker-checker\\deploy.bat"
 
             echo.
+            echo Backend startup command completed.
+            echo.
+
+            timeout /t 15 /nobreak >nul
+
             echo Checking port 8000...
-            echo.
-
             netstat -ano | findstr ":8000"
 
             if errorlevel 1 (
                 echo.
                 echo ERROR: Backend is not listening on port 8000
-                echo.
                 exit /b 1
             )
 
