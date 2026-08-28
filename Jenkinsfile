@@ -380,12 +380,12 @@ stage('Start Backend') {
             @echo off
 
             set "JAVA_HOME=C:\\Program Files\\Java\\jdk-17.0.2"
-            set "PATH=%JAVA_HOME%\\bin;%PATH%"
+            set "JAVA_EXE=C:\\Program Files\\Java\\jdk-17.0.2\\bin\\java.exe"
 
             cd /d "%WORKSPACE%"
 
             echo.
-            echo JAR:
+            echo Backend JAR:
             echo %WORKSPACE%\\%APP_JAR%
 
             if not exist "%WORKSPACE%\\%APP_JAR%" (
@@ -394,38 +394,55 @@ stage('Start Backend') {
             )
 
             echo.
-            echo Creating backend startup script...
+            echo Removing old logs...
 
-            (
-                echo @echo off
-                echo set "JAVA_HOME=C:\\Program Files\\Java\\jdk-17.0.2"
-                echo set "PATH=%%JAVA_HOME%%\\bin;%%PATH%%"
-                echo cd /d "%WORKSPACE%"
-                echo java -jar "%WORKSPACE%\\%APP_JAR%" ^> "%WORKSPACE%\\backend.log" 2^>^&1
-            ) > "%WORKSPACE%\\start-backend.bat"
+            if exist "%WORKSPACE%\\backend-output.log" (
+                del /F /Q "%WORKSPACE%\\backend-output.log"
+            )
 
-            echo.
-            echo Starting backend...
-
-            start "Maker-Checker-Backend" /MIN "%WORKSPACE%\\start-backend.bat"
+            if exist "%WORKSPACE%\\backend-error.log" (
+                del /F /Q "%WORKSPACE%\\backend-error.log"
+            )
 
             echo.
-            echo Backend startup command executed.
+            echo Starting Spring Boot application...
+
+            powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+                "$java = '%JAVA_EXE%'; ^
+                 $jar = '%WORKSPACE%\\%APP_JAR%'; ^
+                 $work = '%WORKSPACE%'; ^
+                 Start-Process -FilePath $java -ArgumentList '-jar',$jar -WorkingDirectory $work -RedirectStandardOutput '%WORKSPACE%\\backend-output.log' -RedirectStandardError '%WORKSPACE%\\backend-error.log' -WindowStyle Hidden"
+
+            if errorlevel 1 (
+                echo.
+                echo ERROR: Failed to create backend process
+                exit /b 1
+            )
 
             echo.
-            echo Waiting for backend...
+            echo Backend process started successfully.
+
+            echo.
+            echo Waiting for backend to initialize...
 
             timeout /t 10 /nobreak >nul
 
             echo.
             echo ==========================================
-            echo BACKEND LOG
+            echo BACKEND OUTPUT
             echo ==========================================
 
-            if exist "%WORKSPACE%\\backend.log" (
-                powershell -NoProfile -Command "Get-Content '%WORKSPACE%\\backend.log' -Tail 50"
-            ) else (
-                echo backend.log not available yet.
+            if exist "%WORKSPACE%\\backend-output.log" (
+                powershell -NoProfile -Command "Get-Content '%WORKSPACE%\\backend-output.log' -Tail 50"
+            )
+
+            echo.
+            echo ==========================================
+            echo BACKEND ERROR
+            echo ==========================================
+
+            if exist "%WORKSPACE%\\backend-error.log" (
+                powershell -NoProfile -Command "Get-Content '%WORKSPACE%\\backend-error.log' -Tail 50"
             )
         '''
     }
