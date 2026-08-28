@@ -396,22 +396,13 @@ stage('Start Backend') {
             echo.
             echo Removing old logs...
 
-            if exist "%WORKSPACE%\\backend-output.log" (
-                del /F /Q "%WORKSPACE%\\backend-output.log"
-            )
-
-            if exist "%WORKSPACE%\\backend-error.log" (
-                del /F /Q "%WORKSPACE%\\backend-error.log"
-            )
+            if exist "%WORKSPACE%\\backend-output.log" del /F /Q "%WORKSPACE%\\backend-output.log"
+            if exist "%WORKSPACE%\\backend-error.log" del /F /Q "%WORKSPACE%\\backend-error.log"
 
             echo.
             echo Starting Spring Boot application...
 
-            powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-                "$java = '%JAVA_EXE%'; ^
-                 $jar = '%WORKSPACE%\\%APP_JAR%'; ^
-                 $work = '%WORKSPACE%'; ^
-                 Start-Process -FilePath $java -ArgumentList '-jar',$jar -WorkingDirectory $work -RedirectStandardOutput '%WORKSPACE%\\backend-output.log' -RedirectStandardError '%WORKSPACE%\\backend-error.log' -WindowStyle Hidden"
+            powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$p = Start-Process -FilePath '%JAVA_EXE%' -ArgumentList '-jar','%WORKSPACE%\\%APP_JAR%' -WorkingDirectory '%WORKSPACE%' -RedirectStandardOutput '%WORKSPACE%\\backend-output.log' -RedirectStandardError '%WORKSPACE%\\backend-error.log' -WindowStyle Hidden -PassThru; Write-Host ('Backend PID: ' + $p.Id)"
 
             if errorlevel 1 (
                 echo.
@@ -433,7 +424,7 @@ stage('Start Backend') {
             echo ==========================================
 
             if exist "%WORKSPACE%\\backend-output.log" (
-                powershell -NoProfile -Command "Get-Content '%WORKSPACE%\\backend-output.log' -Tail 50"
+                type "%WORKSPACE%\\backend-output.log"
             )
 
             echo.
@@ -442,7 +433,7 @@ stage('Start Backend') {
             echo ==========================================
 
             if exist "%WORKSPACE%\\backend-error.log" (
-                powershell -NoProfile -Command "Get-Content '%WORKSPACE%\\backend-error.log' -Tail 50"
+                type "%WORKSPACE%\\backend-error.log"
             )
         '''
     }
