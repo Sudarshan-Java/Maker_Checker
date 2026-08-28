@@ -394,19 +394,13 @@ stage('Start Backend') {
             )
 
             echo.
-            echo Removing old logs...
-
-            if exist "%WORKSPACE%\\backend-output.log" del /F /Q "%WORKSPACE%\\backend-output.log"
-            if exist "%WORKSPACE%\\backend-error.log" del /F /Q "%WORKSPACE%\\backend-error.log"
-
-            echo.
             echo Starting Spring Boot application...
 
-            powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$p = Start-Process -FilePath '%JAVA_EXE%' -ArgumentList '-jar','%WORKSPACE%\\%APP_JAR%' -WorkingDirectory '%WORKSPACE%' -RedirectStandardOutput '%WORKSPACE%\\backend-output.log' -RedirectStandardError '%WORKSPACE%\\backend-error.log' -WindowStyle Hidden -PassThru; Write-Host ('Backend PID: ' + $p.Id)"
+            powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$p = Start-Process -FilePath '%JAVA_EXE%' -ArgumentList '-jar','%WORKSPACE%\\%APP_JAR%' -WorkingDirectory '%WORKSPACE%' -WindowStyle Hidden -PassThru; Write-Host ('Backend PID: ' + $p.Id)"
 
             if errorlevel 1 (
                 echo.
-                echo ERROR: Failed to create backend process
+                echo ERROR: Failed to start backend process
                 exit /b 1
             )
 
@@ -416,29 +410,26 @@ stage('Start Backend') {
             echo.
             echo Waiting for backend to initialize...
 
-            timeout /t 10 /nobreak >nul
+            timeout /t 15 /nobreak >nul
 
             echo.
-            echo ==========================================
-            echo BACKEND OUTPUT
-            echo ==========================================
+            echo Checking backend port...
 
-            if exist "%WORKSPACE%\\backend-output.log" (
-                type "%WORKSPACE%\\backend-output.log"
+            netstat -ano | findstr ":8000"
+
+            if errorlevel 1 (
+                echo.
+                echo ERROR: Backend is not listening on port 8000
+                exit /b 1
             )
 
             echo.
             echo ==========================================
-            echo BACKEND ERROR
+            echo BACKEND IS RUNNING ON PORT 8000
             echo ==========================================
-
-            if exist "%WORKSPACE%\\backend-error.log" (
-                type "%WORKSPACE%\\backend-error.log"
-            )
         '''
     }
 }
-
 
         // ============================================================
         // 8. BACKEND HEALTH CHECK
