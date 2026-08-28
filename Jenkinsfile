@@ -369,7 +369,9 @@ pipeline {
         // ============================================================
 
 stage('Start Backend') {
+
     steps {
+
         echo '=========================================='
         echo 'STARTING MAKER-CHECKER BACKEND'
         echo '=========================================='
@@ -377,36 +379,40 @@ stage('Start Backend') {
         bat '''
             @echo off
 
+            cd /d "%WORKSPACE%"
+
             set "JAVA_HOME=C:\\Program Files\\Java\\jdk-17.0.2"
             set "MAVEN_HOME=D:\\Softwarepath\\apache-maven-3.8.5"
             set "PATH=%JAVA_HOME%\\bin;%MAVEN_HOME%\\bin;%PATH%"
 
-            cd /d "%WORKSPACE%"
-
+            echo.
             echo Starting Maven Spring Boot application...
+            echo.
 
-            powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
-              "$psi = New-Object System.Diagnostics.ProcessStartInfo; ^
-               $psi.FileName = 'cmd.exe'; ^
-               $psi.Arguments = '/c mvn spring-boot:run'; ^
-               $psi.WorkingDirectory = '%WORKSPACE%'; ^
-               $psi.UseShellExecute = $true; ^
-               $psi.CreateNoWindow = $false; ^
-               [System.Diagnostics.Process]::Start($psi) | Out-Null"
+            powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$p = New-Object System.Diagnostics.Process; $p.StartInfo.FileName = 'cmd.exe'; $p.StartInfo.Arguments = '/k cd /d ""%WORKSPACE%"" && mvn spring-boot:run'; $p.StartInfo.WorkingDirectory = '%WORKSPACE%'; $p.StartInfo.UseShellExecute = $true; $p.Start(); Write-Host ('Backend PID: ' + $p.Id)"
+
+            if errorlevel 1 (
+                echo.
+                echo ERROR: Failed to start backend
+                exit /b 1
+            )
 
             echo.
-            echo Backend startup command sent.
+            echo Backend startup command sent successfully.
+            echo.
 
-            timeout /t 15 /nobreak >nul
+            timeout /t 20 /nobreak >nul
 
             echo.
-            echo Checking backend port 8000...
+            echo Checking port 8000...
+            echo.
 
             netstat -ano | findstr ":8000"
 
             if errorlevel 1 (
                 echo.
-                echo ERROR: Backend did not start on port 8000
+                echo ERROR: Backend is not listening on port 8000
+                echo.
                 exit /b 1
             )
 
@@ -417,7 +423,6 @@ stage('Start Backend') {
         '''
     }
 }
-
         // ============================================================
         // 8. BACKEND HEALTH CHECK
         // ============================================================
