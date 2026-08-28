@@ -291,84 +291,40 @@ pipeline {
         // 5. VERIFY BOTH APPZILLON WAR FILES
         // ============================================================
 
-        stage('Verify Appzillon WAR Files') {
+       stage('Verify Appzillon WAR Files') {
 
-            steps {
+    steps {
 
-                echo '=========================================='
-                echo 'VERIFYING APPZILLON WAR FILES'
-                echo '=========================================='
+        echo '=========================================='
+        echo 'VERIFYING APPZILLON WAR FILES'
+        echo '=========================================='
 
+        bat '''
+            @echo off
 
-                bat '''
-                    @echo off
+            echo.
+            echo Checking AppzillonServer.war...
+            echo %APPZILLON_SERVER_WAR%
 
+            if not exist "%APPZILLON_SERVER_WAR%" exit /b 1
 
-                    echo.
-                    echo ==========================================
-                    echo APPZILLON SERVER WAR
-                    echo ==========================================
+            echo AppzillonServer.war FOUND
 
-                    echo Path:
-                    echo %APPZILLON_SERVER_WAR%
+            echo.
+            echo Checking Checker_Maker.war...
+            echo %CHECKER_MAKER_WAR%
 
+            if not exist "%CHECKER_MAKER_WAR%" exit /b 1
 
-                    if not exist "%APPZILLON_SERVER_WAR%" (
+            echo Checker_Maker.war FOUND
 
-                        echo.
-                        echo ERROR:
-                        echo AppzillonServer.war NOT FOUND
-
-                        echo.
-                        echo Expected:
-                        echo %APPZILLON_SERVER_WAR%
-
-                        exit /b 1
-                    }
-
-
-                    echo.
-                    echo AppzillonServer.war FOUND
-
-                    dir "%APPZILLON_SERVER_WAR%"
-
-
-                    echo.
-                    echo ==========================================
-                    echo CHECKER MAKER WAR
-                    echo ==========================================
-
-                    echo Path:
-                    echo %CHECKER_MAKER_WAR%
-
-
-                    if not exist "%CHECKER_MAKER_WAR%" (
-
-                        echo.
-                        echo ERROR:
-                        echo Checker_Maker.war NOT FOUND
-
-                        echo.
-                        echo Expected:
-                        echo %CHECKER_MAKER_WAR%
-
-                        exit /b 1
-                    }
-
-
-                    echo.
-                    echo Checker_Maker.war FOUND
-
-                    dir "%CHECKER_MAKER_WAR%"
-
-
-                    echo.
-                    echo ==========================================
-                    echo BOTH WAR FILES FOUND SUCCESSFULLY
-                    echo ==========================================
-                '''
-            }
-        }
+            echo.
+            echo ==========================================
+            echo BOTH WAR FILES FOUND SUCCESSFULLY
+            echo ==========================================
+        '''
+    }
+}
 
 
         // ============================================================
