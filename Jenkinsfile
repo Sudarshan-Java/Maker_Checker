@@ -380,40 +380,38 @@ stage('Start Backend') {
             @echo off
 
             set "JAVA_HOME=C:\\Program Files\\Java\\jdk-17.0.2"
-            set "JAVA_EXE=C:\\Program Files\\Java\\jdk-17.0.2\\bin\\java.exe"
+            set "MAVEN_HOME=D:\\Softwarepath\\apache-maven-3.8.5"
+            set "PATH=%JAVA_HOME%\\bin;%MAVEN_HOME%\\bin;%PATH%"
 
             cd /d "%WORKSPACE%"
 
             echo.
-            echo Backend JAR:
-            echo %WORKSPACE%\\%APP_JAR%
-
-            if not exist "%WORKSPACE%\\%APP_JAR%" (
-                echo ERROR: Backend JAR not found
-                exit /b 1
-            )
+            echo Current directory:
+            cd
 
             echo.
-            echo Starting Spring Boot application...
+            echo Starting backend using Maven...
+            echo Command:
+            echo mvn spring-boot:run
 
-            powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$p = Start-Process -FilePath '%JAVA_EXE%' -ArgumentList '-jar','%WORKSPACE%\\%APP_JAR%' -WorkingDirectory '%WORKSPACE%' -WindowStyle Hidden -PassThru; Write-Host ('Backend PID: ' + $p.Id)"
+            powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$p = Start-Process -FilePath 'cmd.exe' -ArgumentList '/c','mvn spring-boot:run' -WorkingDirectory '%WORKSPACE%' -WindowStyle Hidden -PassThru; Write-Host ('Backend Maven PID: ' + $p.Id)"
 
             if errorlevel 1 (
                 echo.
-                echo ERROR: Failed to start backend process
+                echo ERROR: Failed to start Maven backend
                 exit /b 1
             )
 
             echo.
-            echo Backend process started successfully.
+            echo Backend startup command executed.
 
             echo.
-            echo Waiting for backend to initialize...
+            echo Waiting for backend to start...
 
             timeout /t 15 /nobreak >nul
 
             echo.
-            echo Checking backend port...
+            echo Checking port 8000...
 
             netstat -ano | findstr ":8000"
 
