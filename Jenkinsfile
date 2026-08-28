@@ -369,18 +369,13 @@ pipeline {
         // ============================================================
 
 stage('Start Backend') {
-
     steps {
-
         echo '=========================================='
         echo 'STARTING MAKER-CHECKER BACKEND'
         echo '=========================================='
 
         bat '''
             @echo off
-
-            echo Starting backend using deploy.bat...
-            echo.
 
             if not exist "C:\\deploy\\maker-checker\\deploy.bat" (
                 echo ERROR: deploy.bat not found
@@ -390,17 +385,20 @@ stage('Start Backend') {
             call "C:\\deploy\\maker-checker\\deploy.bat"
 
             echo.
-            echo Backend startup command completed.
+            echo Waiting for backend to start...
+            timeout /t 20 /nobreak >nul
+
             echo.
-
-            timeout /t 15 /nobreak >nul
-
             echo Checking port 8000...
+
             netstat -ano | findstr ":8000"
 
             if errorlevel 1 (
                 echo.
                 echo ERROR: Backend is not listening on port 8000
+                echo.
+                echo Check:
+                echo C:\\deploy\\maker-checker\\application.log
                 exit /b 1
             )
 
