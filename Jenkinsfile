@@ -385,9 +385,6 @@ stage('Start Backend') {
             cd /d "%WORKSPACE%"
 
             echo.
-            echo Starting backend...
-
-            echo.
             echo JAR:
             echo %WORKSPACE%\\%APP_JAR%
 
@@ -397,15 +394,26 @@ stage('Start Backend') {
             )
 
             echo.
-            echo Starting Spring Boot application...
+            echo Creating backend startup script...
 
-            start "Maker-Checker-Backend" /MIN cmd /c "java -jar \"%WORKSPACE%\\%APP_JAR%\" > \"%WORKSPACE%\\backend.log\" 2>&1"
+            (
+                echo @echo off
+                echo set "JAVA_HOME=C:\\Program Files\\Java\\jdk-17.0.2"
+                echo set "PATH=%%JAVA_HOME%%\\bin;%%PATH%%"
+                echo cd /d "%WORKSPACE%"
+                echo java -jar "%WORKSPACE%\\%APP_JAR%" ^> "%WORKSPACE%\\backend.log" 2^>^&1
+            ) > "%WORKSPACE%\\start-backend.bat"
+
+            echo.
+            echo Starting backend...
+
+            start "Maker-Checker-Backend" /MIN "%WORKSPACE%\\start-backend.bat"
 
             echo.
             echo Backend startup command executed.
 
             echo.
-            echo Waiting for backend to initialize...
+            echo Waiting for backend...
 
             timeout /t 10 /nobreak >nul
 
@@ -417,7 +425,7 @@ stage('Start Backend') {
             if exist "%WORKSPACE%\\backend.log" (
                 powershell -NoProfile -Command "Get-Content '%WORKSPACE%\\backend.log' -Tail 50"
             ) else (
-                echo Backend log has not been created yet.
+                echo backend.log not available yet.
             )
         '''
     }
