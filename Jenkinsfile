@@ -387,12 +387,7 @@ pipeline {
 
                     echo java -jar %APP_JAR%
 
-                    powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-                        "$env:JENKINS_NODE_COOKIE = 'dontKillMe'; ^
-                         $env:JENKINS_SERVER_COOKIE = 'dontKillMe'; ^
-                         $java = Join-Path $env:JAVA_HOME 'bin\\java.exe'; ^
-                         $process = Start-Process -FilePath $java -ArgumentList @('-jar','%APP_JAR%') -WorkingDirectory '%WORKSPACE%\\%PROJECT_DIR%' -RedirectStandardOutput '%WORKSPACE%\\%PROJECT_DIR%\\backend.log' -RedirectStandardError '%WORKSPACE%\\%PROJECT_DIR%\\backend-error.log' -WindowStyle Hidden -PassThru; ^
-                         if ($process.HasExited) { exit $process.ExitCode }"
+                    powershell -NoProfile -ExecutionPolicy Bypass -Command "$env:JENKINS_NODE_COOKIE = 'dontKillMe'; $env:JENKINS_SERVER_COOKIE = 'dontKillMe'; $java = Join-Path $env:JAVA_HOME 'bin\\java.exe'; $process = Start-Process -FilePath $java -ArgumentList @('-jar','%APP_JAR%') -WorkingDirectory '%WORKSPACE%\\%PROJECT_DIR%' -RedirectStandardOutput '%WORKSPACE%\\%PROJECT_DIR%\\backend.log' -RedirectStandardError '%WORKSPACE%\\%PROJECT_DIR%\\backend-error.log' -WindowStyle Hidden -PassThru; if ($process.HasExited) { exit $process.ExitCode }"
 
                     echo.
                     if errorlevel 1 (
