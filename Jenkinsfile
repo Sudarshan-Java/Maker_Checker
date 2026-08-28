@@ -368,65 +368,60 @@ pipeline {
         // 7. START BACKEND
         // ============================================================
 
-        stage('Start Backend') {
+stage('Start Backend') {
 
-            steps {
+    steps {
 
-                echo '=========================================='
-                echo 'STARTING MAKER-CHECKER BACKEND'
-                echo '=========================================='
+        echo '=========================================='
+        echo 'STARTING MAKER-CHECKER BACKEND'
+        echo '=========================================='
 
+        bat '''
+            @echo off
 
-                bat '''
-                    @echo off
+            set "JAVA_HOME=C:\\Program Files\\Java\\jdk-17.0.2"
+            set "PATH=%JAVA_HOME%\\bin;%PATH%"
 
-                    set "JAVA_HOME=%JAVA_HOME%"
-                    set "PATH=%JAVA_HOME%\\bin;%PATH%"
+            cd /d "%WORKSPACE%"
 
-                    set "JENKINS_NODE_COOKIE=dontKillMe"
+            echo.
+            echo Starting backend...
 
-                    cd /d "%WORKSPACE%\\%PROJECT_DIR%"
+            echo.
+            echo JAR:
+            echo %WORKSPACE%\\%APP_JAR%
 
+            if not exist "%WORKSPACE%\\%APP_JAR%" (
+                echo ERROR: Backend JAR not found
+                exit /b 1
+            )
 
-                    echo.
-                    echo Starting:
+            echo.
+            echo Starting Spring Boot application...
 
-                    echo java -jar %APP_JAR%
+            start "Maker-Checker-Backend" /MIN cmd /c "java -jar \"%WORKSPACE%\\%APP_JAR%\" > \"%WORKSPACE%\\backend.log\" 2>&1"
 
+            echo.
+            echo Backend startup command executed.
 
-                    start "Maker-Checker-Backend" /B cmd /c ^
-                        "set JENKINS_NODE_COOKIE=dontKillMe && ^
-                         set JAVA_HOME=%JAVA_HOME% && ^
-                         java -jar %APP_JAR% > backend.log 2>&1"
+            echo.
+            echo Waiting for backend to initialize...
 
+            timeout /t 10 /nobreak >nul
 
-                    echo.
-                    echo Backend startup command executed.
+            echo.
+            echo ==========================================
+            echo BACKEND LOG
+            echo ==========================================
 
-
-                    echo.
-                    echo Waiting for backend to initialize...
-
-                    ping 127.0.0.1 -n 8 >nul
-
-
-                    echo.
-                    echo ==========================================
-                    echo BACKEND LOG
-                    echo ==========================================
-
-
-                    if exist backend.log (
-
-                        powershell -Command "Get-Content backend.log -Tail 50"
-
-                    ) else (
-
-                        echo backend.log not found
-                    )
-                '''
-            }
-        }
+            if exist "%WORKSPACE%\\backend.log" (
+                powershell -NoProfile -Command "Get-Content '%WORKSPACE%\\backend.log' -Tail 50"
+            ) else (
+                echo Backend log has not been created yet.
+            )
+        '''
+    }
+}
 
 
         // ============================================================
