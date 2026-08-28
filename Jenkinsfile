@@ -369,9 +369,7 @@ pipeline {
         // ============================================================
 
 stage('Start Backend') {
-
     steps {
-
         echo '=========================================='
         echo 'STARTING MAKER-CHECKER BACKEND'
         echo '=========================================='
@@ -385,39 +383,30 @@ stage('Start Backend') {
 
             cd /d "%WORKSPACE%"
 
-            echo.
-            echo Current directory:
-            cd
+            echo Starting Maven Spring Boot application...
+
+            powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
+              "$psi = New-Object System.Diagnostics.ProcessStartInfo; ^
+               $psi.FileName = 'cmd.exe'; ^
+               $psi.Arguments = '/c mvn spring-boot:run'; ^
+               $psi.WorkingDirectory = '%WORKSPACE%'; ^
+               $psi.UseShellExecute = $true; ^
+               $psi.CreateNoWindow = $false; ^
+               [System.Diagnostics.Process]::Start($psi) | Out-Null"
 
             echo.
-            echo Starting backend using Maven...
-            echo Command:
-            echo mvn spring-boot:run
-
-            powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$p = Start-Process -FilePath 'cmd.exe' -ArgumentList '/c','mvn spring-boot:run' -WorkingDirectory '%WORKSPACE%' -WindowStyle Hidden -PassThru; Write-Host ('Backend Maven PID: ' + $p.Id)"
-
-            if errorlevel 1 (
-                echo.
-                echo ERROR: Failed to start Maven backend
-                exit /b 1
-            )
-
-            echo.
-            echo Backend startup command executed.
-
-            echo.
-            echo Waiting for backend to start...
+            echo Backend startup command sent.
 
             timeout /t 15 /nobreak >nul
 
             echo.
-            echo Checking port 8000...
+            echo Checking backend port 8000...
 
             netstat -ano | findstr ":8000"
 
             if errorlevel 1 (
                 echo.
-                echo ERROR: Backend is not listening on port 8000
+                echo ERROR: Backend did not start on port 8000
                 exit /b 1
             )
 
